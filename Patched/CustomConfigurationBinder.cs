@@ -378,7 +378,10 @@ namespace Microsoft.Extensions.Configuration.Custom
                 return;
             }
 
-            if (config.GetChildren().Any())
+            // START: Patch to create instance from empty JSON collection in configuration.
+            //if (config.GetChildren().Any())
+            if (config.GetChildren().Any() || (configValue == string.Empty && type != typeof(string) && type.IsAssignableTo(typeof(IEnumerable))))
+            // END: Patch to create instance from empty JSON collection in configuration.
             {
                 // for arrays and read-only list-like interfaces, we concatenate on to what is already there, if we can
                 if (type.IsArray || IsImmutableArrayCompatibleInterface(type))
@@ -507,7 +510,10 @@ namespace Microsoft.Extensions.Configuration.Custom
                 }
                 else
                 {
-                    if (isParentCollection && bindingPoint.Value is null)
+                    // START: Patch to create instance from empty JSON object in configuration.
+                    //if (isParentCollection && bindingPoint.Value is null)
+                    if (bindingPoint.Value is null && configValue is not null)
+                    // END: Patch to create instance from empty JSON object in configuration.
                     {
                         // Try to create the default instance of the type
                         bindingPoint.TrySetValue(CreateInstance(type, config, options, out _));
@@ -525,6 +531,12 @@ namespace Microsoft.Extensions.Configuration.Custom
                             bindingPoint.TrySetValue(bindingPoint.Value); // force setting null value
                         }
                     }
+                    // START: Patch to set existing instance to NULL.
+                    else if (isConfigurationExist && bindingPoint.Value is not null && configValue is null)
+                    {
+                        bindingPoint.TrySetValue(null);
+                    }
+                    // END: Patch to set existing instance to NULL.
                 }
             }
         }

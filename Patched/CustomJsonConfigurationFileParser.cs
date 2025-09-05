@@ -54,7 +54,10 @@ namespace Microsoft.Extensions.Configuration.Json.Custom
                 ExitContext();
             }
 
-            SetNullIfElementIsEmpty(isEmpty);
+            // START: Patch to store empty object as "" instead of null.
+            //SetNullIfElementIsEmpty(isEmpty);
+            SetEmptyIfElementIsEmpty(isEmpty);
+            // END: Patch to store empty object as "" instead of null.
         }
 
         private void VisitArrayElement(JsonElement element)

@@ -50,25 +50,19 @@ public class ConfigurationTests
             """;
 
         using var stream = StringToStream(json);
-        var configuration = new ConfigurationBuilder().AddJsonStream(stream).Build();
+        var configuration = new ConfigurationBuilder().AddCustomJsonStream(stream).Build();
         var configurationProvider = configuration.Providers.OfType<JsonStreamConfigurationProvider>().Single();
 
         using (new AssertionScope())
         {
             AssertGetValue(configurationProvider, "root:empty-array", IsDotNet10 ? string.Empty : null);
             AssertGetValue(configurationProvider, "root:array-containing-null:0", IsDotNet10 ? null : string.Empty);
-#if !NET10_0_OR_GREATER
-            AssertGetValue(configurationProvider, "root:array-containing-empty-object:0", IsDotNet10 ? string.Empty : null); // FAILS on net10.0: is null
-#endif
+            AssertGetValue(configurationProvider, "root:array-containing-empty-object:0", IsDotNet10 ? string.Empty : null);
             AssertGetValue(configurationProvider, "root:array-containing-object:0:key", "value");
             AssertGetValue(configurationProvider, "root:array-containing-all:0", IsDotNet10 ? null : string.Empty);
-#if !NET10_0_OR_GREATER
-            AssertGetValue(configurationProvider, "root:array-containing-all:1", IsDotNet10 ? string.Empty : null); // FAILS on net10.0: is null
-#endif
+            AssertGetValue(configurationProvider, "root:array-containing-all:1", IsDotNet10 ? string.Empty : null);
             AssertGetValue(configurationProvider, "root:array-containing-all:2:key", "value");
-#if !NET10_0_OR_GREATER
-            AssertGetValue(configurationProvider, "root:empty-object", IsDotNet10 ? string.Empty : null); // FAILS on net10.0: is null
-#endif
+            AssertGetValue(configurationProvider, "root:empty-object", IsDotNet10 ? string.Empty : null);
             AssertGetValue(configurationProvider, "root:object:key", "value");
         }
     }
@@ -84,12 +78,12 @@ public class ConfigurationTests
             """;
 
         using var stream = StringToStream(json);
-        var configuration = new ConfigurationBuilder().AddJsonStream(stream).Build();
+        var configuration = new ConfigurationBuilder().AddCustomJsonStream(stream).Build();
         var configurationProvider = configuration.Providers.OfType<JsonStreamConfigurationProvider>().Single();
 
         var services = new ServiceCollection();
         services.AddSingleton<IConfiguration>(configuration);
-        services.AddOptions<Container>().BindConfiguration("root");
+        services.AddOptions<Container>().CustomBindConfiguration("root");
         using var serviceProvider = services.BuildServiceProvider(true);
 
         var optionsMonitor = serviceProvider.GetRequiredService<IOptionsMonitor<Container>>();
@@ -126,9 +120,7 @@ public class ConfigurationTests
             container.NonNullableNamedChildren.Should().BeNull();
             container.NonNullableNamedChildrenWithDefaultEmpty.Should().BeEmpty();
 
-#if !NET10_0_OR_GREATER
-            AssertGetValue(configurationProvider, "root", IsDotNet10 ? string.Empty : null); // FAILS on net10.0: is null
-#endif
+            AssertGetValue(configurationProvider, "root", IsDotNet10 ? string.Empty : null);
         }
     }
 
@@ -171,12 +163,12 @@ public class ConfigurationTests
             """;
 
         using var stream = StringToStream(json);
-        var configuration = new ConfigurationBuilder().AddJsonStream(stream).Build();
+        var configuration = new ConfigurationBuilder().AddCustomJsonStream(stream).Build();
         var configurationProvider = configuration.Providers.OfType<JsonStreamConfigurationProvider>().Single();
 
         var services = new ServiceCollection();
         services.AddSingleton<IConfiguration>(configuration);
-        services.AddOptions<Container>().BindConfiguration("root");
+        services.AddOptions<Container>().CustomBindConfiguration("root");
         using var serviceProvider = services.BuildServiceProvider(true);
 
         var optionsMonitor = serviceProvider.GetRequiredService<IOptionsMonitor<Container>>();
@@ -200,39 +192,39 @@ public class ConfigurationTests
 
             container.NullableChild.Should().BeNull();
 #if NET10_0_OR_GREATER
-            //container.NullableChildWithDefaultEmpty.Should().BeNull(); // FAILS on net10.0: is EmptyChild
+            container.NullableChildWithDefaultEmpty.Should().BeNull();
 #else
             container.NullableChildWithDefaultEmpty.Should().BeEquivalentTo(EmptyChild);
 #endif
             container.NonNullableChild.Should().BeNull();
 #if NET10_0_OR_GREATER
-            //container.NonNullableChildWithDefaultEmpty.Should().BeNull(); // FAILS on net10.0: is EmptyChild
+            container.NonNullableChildWithDefaultEmpty.Should().BeNull();
 #else
             container.NonNullableChildWithDefaultEmpty.Should().BeEquivalentTo(EmptyChild);
 #endif
 
             container.NullableChildren.Should().BeNull();
 #if NET10_0_OR_GREATER
-            //container.NullableChildrenWithDefaultEmpty.Should().BeNull(); // FAILS on net10.0: is []
+            container.NullableChildrenWithDefaultEmpty.Should().BeNull();
 #else
             container.NullableChildrenWithDefaultEmpty.Should().BeEmpty();
 #endif
             container.NonNullableChildren.Should().BeNull();
 #if NET10_0_OR_GREATER
-            //container.NonNullableChildrenWithDefaultEmpty.Should().BeNull(); // FAILS on net10.0: is []
+            container.NonNullableChildrenWithDefaultEmpty.Should().BeNull();
 #else
             container.NonNullableChildrenWithDefaultEmpty.Should().BeEmpty();
 #endif
 
             container.NullableNamedChildren.Should().BeNull();
 #if NET10_0_OR_GREATER
-            //container.NullableNamedChildrenWithDefaultEmpty.Should().BeNull(); // FAILS on net10.0: is []
+            container.NullableNamedChildrenWithDefaultEmpty.Should().BeNull();
 #else
             container.NullableNamedChildrenWithDefaultEmpty.Should().BeEmpty();
 #endif
             container.NonNullableNamedChildren.Should().BeNull();
 #if NET10_0_OR_GREATER
-            //container.NonNullableNamedChildrenWithDefaultEmpty.Should().BeNull(); // FAILS on net10.0: is []
+            container.NonNullableNamedChildrenWithDefaultEmpty.Should().BeNull();
 #else
             container.NonNullableNamedChildrenWithDefaultEmpty.Should().BeEmpty();
 #endif
@@ -293,12 +285,12 @@ public class ConfigurationTests
             """;
 
         using var stream = StringToStream(json);
-        var configuration = new ConfigurationBuilder().AddJsonStream(stream).Build();
+        var configuration = new ConfigurationBuilder().AddCustomJsonStream(stream).Build();
         var configurationProvider = configuration.Providers.OfType<JsonStreamConfigurationProvider>().Single();
 
         var services = new ServiceCollection();
         services.AddSingleton<IConfiguration>(configuration);
-        services.AddOptions<Container>().BindConfiguration("root");
+        services.AddOptions<Container>().CustomBindConfiguration("root");
         using var serviceProvider = services.BuildServiceProvider(true);
 
         var optionsMonitor = serviceProvider.GetRequiredService<IOptionsMonitor<Container>>();
@@ -307,62 +299,58 @@ public class ConfigurationTests
         using (new AssertionScope())
         {
 #if NET10_0_OR_GREATER
-            //container.NullableChild.Should().BeEquivalentTo(EmptyChild); // FAILS on net10.0: is null
+            container.NullableChild.Should().BeEquivalentTo(EmptyChild);
 #else
             container.NullableChild.Should().BeNull();
 #endif
             container.NullableChildWithDefaultEmpty.Should().BeEquivalentTo(EmptyChild);
 #if NET10_0_OR_GREATER
-            //container.NonNullableChild.Should().BeEquivalentTo(EmptyChild); // FAILS on net10.0: is null
+            container.NonNullableChild.Should().BeEquivalentTo(EmptyChild);
 #else
             container.NonNullableChild.Should().BeNull();
 #endif
             container.NonNullableChildWithDefaultEmpty.Should().BeEquivalentTo(EmptyChild);
 
 #if NET10_0_OR_GREATER
-            //container.NullableChildren.Should().BeEmpty(); // FAILS on net10.0: is null
+            container.NullableChildren.Should().BeEmpty();
 #else
             container.NullableChildren.Should().BeNull();
 #endif
             container.NullableChildrenWithDefaultEmpty.Should().BeEmpty();
 #if NET10_0_OR_GREATER
-            //container.NonNullableChildren.Should().BeEmpty(); // FAILS on net10.0: is null
+            container.NonNullableChildren.Should().BeEmpty();
 #else
             container.NonNullableChildren.Should().BeNull();
 #endif
             container.NonNullableChildrenWithDefaultEmpty.Should().BeEmpty();
 
 #if NET10_0_OR_GREATER
-            //container.NullableNamedChildren.Should().BeEmpty(); // FAILS on net10.0: is null
+            container.NullableNamedChildren.Should().BeEmpty();
 #else
             container.NullableNamedChildren.Should().BeNull();
 #endif
             container.NullableNamedChildrenWithDefaultEmpty.Should().BeEmpty();
 #if NET10_0_OR_GREATER
-            //container.NonNullableNamedChildren.Should().BeEmpty(); // FAILS on net10.0: is null
+            container.NonNullableNamedChildren.Should().BeEmpty();
 #else
             container.NonNullableNamedChildren.Should().BeNull();
 #endif
             container.NonNullableNamedChildrenWithDefaultEmpty.Should().BeEmpty();
 
-#if !NET10_0_OR_GREATER
-            AssertGetValue(configurationProvider, "root:NullableChild", IsDotNet10 ? string.Empty : null); // FAILS on net10.0: is null
-            AssertGetValue(configurationProvider, "root:NullableChildWithDefaultEmpty", IsDotNet10 ? string.Empty : null); // FAILS on net10.0: is null
-            AssertGetValue(configurationProvider, "root:NonNullableChild", IsDotNet10 ? string.Empty : null); // FAILS on net10.0: is null
-            AssertGetValue(configurationProvider, "root:NonNullableChildWithDefaultEmpty", IsDotNet10 ? string.Empty : null); // FAILS on net10.0: is null
-#endif
+            AssertGetValue(configurationProvider, "root:NullableChild", IsDotNet10 ? string.Empty : null);
+            AssertGetValue(configurationProvider, "root:NullableChildWithDefaultEmpty", IsDotNet10 ? string.Empty : null);
+            AssertGetValue(configurationProvider, "root:NonNullableChild", IsDotNet10 ? string.Empty : null);
+            AssertGetValue(configurationProvider, "root:NonNullableChildWithDefaultEmpty", IsDotNet10 ? string.Empty : null);
 
             AssertGetValue(configurationProvider, "root:NullableChildren", IsDotNet10 ? string.Empty : null);
             AssertGetValue(configurationProvider, "root:NullableChildrenWithDefaultEmpty", IsDotNet10 ? string.Empty : null);
             AssertGetValue(configurationProvider, "root:NonNullableChildren", IsDotNet10 ? string.Empty : null);
             AssertGetValue(configurationProvider, "root:NonNullableChildrenWithDefaultEmpty", IsDotNet10 ? string.Empty : null);
 
-#if !NET10_0_OR_GREATER
-            AssertGetValue(configurationProvider, "root:NullableNamedChildren", IsDotNet10 ? string.Empty : null); // FAILS on net10.0: is null
-            AssertGetValue(configurationProvider, "root:NullableNamedChildrenWithDefaultEmpty", IsDotNet10 ? string.Empty : null); // FAILS on net10.0: is null
-            AssertGetValue(configurationProvider, "root:NonNullableNamedChildren", IsDotNet10 ? string.Empty : null); // FAILS on net10.0: is null
-            AssertGetValue(configurationProvider, "root:NonNullableNamedChildrenWithDefaultEmpty", IsDotNet10 ? string.Empty : null); // FAILS on net10.0: is null
-#endif
+            AssertGetValue(configurationProvider, "root:NullableNamedChildren", IsDotNet10 ? string.Empty : null);
+            AssertGetValue(configurationProvider, "root:NullableNamedChildrenWithDefaultEmpty", IsDotNet10 ? string.Empty : null);
+            AssertGetValue(configurationProvider, "root:NonNullableNamedChildren", IsDotNet10 ? string.Empty : null);
+            AssertGetValue(configurationProvider, "root:NonNullableNamedChildrenWithDefaultEmpty", IsDotNet10 ? string.Empty : null);
         }
     }
 
@@ -402,12 +390,12 @@ public class ConfigurationTests
             """;
 
         using var stream = StringToStream(json);
-        var configuration = new ConfigurationBuilder().AddJsonStream(stream).Build();
+        var configuration = new ConfigurationBuilder().AddCustomJsonStream(stream).Build();
         var configurationProvider = configuration.Providers.OfType<JsonStreamConfigurationProvider>().Single();
 
         var services = new ServiceCollection();
         services.AddSingleton<IConfiguration>(configuration);
-        services.AddOptions<Container>().BindConfiguration("root");
+        services.AddOptions<Container>().CustomBindConfiguration("root");
         using var serviceProvider = services.BuildServiceProvider(true);
 
         var optionsMonitor = serviceProvider.GetRequiredService<IOptionsMonitor<Container>>();
@@ -425,17 +413,15 @@ public class ConfigurationTests
             container.NonNullableNamedChildren.Should().ContainKey("TestKey").WhoseValue.Should().BeEquivalentTo(EmptyChild);
             container.NonNullableNamedChildrenWithDefaultEmpty.Should().ContainKey("TestKey").WhoseValue.Should().BeEquivalentTo(EmptyChild);
 
-#if !NET10_0_OR_GREATER
-            AssertGetValue(configurationProvider, "root:NullableChildren:0", IsDotNet10 ? string.Empty : null); // FAILS on net10.0: is null
-            AssertGetValue(configurationProvider, "root:NullableChildrenWithDefaultEmpty:0", IsDotNet10 ? string.Empty : null); // FAILS on net10.0: is null
-            AssertGetValue(configurationProvider, "root:NonNullableChildren:0", IsDotNet10 ? string.Empty : null); // FAILS on net10.0: is null
-            AssertGetValue(configurationProvider, "root:NonNullableChildrenWithDefaultEmpty:0", IsDotNet10 ? string.Empty : null); // FAILS on net10.0: is null
+            AssertGetValue(configurationProvider, "root:NullableChildren:0", IsDotNet10 ? string.Empty : null);
+            AssertGetValue(configurationProvider, "root:NullableChildrenWithDefaultEmpty:0", IsDotNet10 ? string.Empty : null);
+            AssertGetValue(configurationProvider, "root:NonNullableChildren:0", IsDotNet10 ? string.Empty : null);
+            AssertGetValue(configurationProvider, "root:NonNullableChildrenWithDefaultEmpty:0", IsDotNet10 ? string.Empty : null);
 
-            AssertGetValue(configurationProvider, "root:NullableNamedChildren:TestKey", IsDotNet10 ? string.Empty : null); // FAILS on net10.0: is null
-            AssertGetValue(configurationProvider, "root:NullableNamedChildrenWithDefaultEmpty:TestKey", IsDotNet10 ? string.Empty : null); // FAILS on net10.0: is null
-            AssertGetValue(configurationProvider, "root:NonNullableNamedChildren:TestKey", IsDotNet10 ? string.Empty : null); // FAILS on net10.0: is null
-            AssertGetValue(configurationProvider, "root:NonNullableNamedChildrenWithDefaultEmpty:TestKey", IsDotNet10 ? string.Empty : null); // FAILS on net10.0: is null
-#endif
+            AssertGetValue(configurationProvider, "root:NullableNamedChildren:TestKey", IsDotNet10 ? string.Empty : null);
+            AssertGetValue(configurationProvider, "root:NullableNamedChildrenWithDefaultEmpty:TestKey", IsDotNet10 ? string.Empty : null);
+            AssertGetValue(configurationProvider, "root:NonNullableNamedChildren:TestKey", IsDotNet10 ? string.Empty : null);
+            AssertGetValue(configurationProvider, "root:NonNullableNamedChildrenWithDefaultEmpty:TestKey", IsDotNet10 ? string.Empty : null);
         }
     }
 
@@ -518,12 +504,12 @@ public class ConfigurationTests
             """;
 
         using var stream = StringToStream(json);
-        var configuration = new ConfigurationBuilder().AddJsonStream(stream).Build();
+        var configuration = new ConfigurationBuilder().AddCustomJsonStream(stream).Build();
         var configurationProvider = configuration.Providers.OfType<JsonStreamConfigurationProvider>().Single();
 
         var services = new ServiceCollection();
         services.AddSingleton<IConfiguration>(configuration);
-        services.AddOptions<Container>().BindConfiguration("root");
+        services.AddOptions<Container>().CustomBindConfiguration("root");
         using var serviceProvider = services.BuildServiceProvider(true);
 
         var optionsMonitor = serviceProvider.GetRequiredService<IOptionsMonitor<Container>>();
